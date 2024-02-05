@@ -2,18 +2,16 @@ from fastapi import APIRouter
 from src.auth.models import UserLogin, User
 from fastapi import Body
 from src.auth.utils import check_user, signJWT, hash_password
-from src.database import add_user
+from src.database import add_user, get_user
 
 users = []
 
 login_router = APIRouter(prefix="/auth")
 @login_router.post("/login")
 async def login(user: UserLogin = Body(...)):
-    if check_user(user):
-        return signJWT(user.email)
-    return {
-        "error": "Wrong login details!"
-    }
+    response = get_user(user)
+    return response
+
 
 
 @login_router.post("/signup")

@@ -2,6 +2,7 @@ import time
 from typing import Dict
 import jwt
 from decouple import config
+from fastapi import Depends, Response, Request
 from .models import User, UserLogin
 import bcrypt
 
@@ -23,6 +24,9 @@ def signJWT(user_id: str) -> Dict[str, str]:
 
     return token_response(token)
 
+
+
+
 def decodeJWT(token: str) -> dict:
     try:
         decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
@@ -30,7 +34,10 @@ def decodeJWT(token: str) -> dict:
     except:
         return {}
 
-
+def deleteJWT(request: Request):
+    token = request.headers.get("Authorization")
+    if token:
+        token['expires'] = time.time()
 def check_user(data: UserLogin, users: list[User]):
     for user in users:
         if user.Email == data.Email and user.Password == data.Password:
@@ -42,3 +49,13 @@ def hash_password(password: str):
 
 def verify_password(plain_password: str, hashed_password: str):
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+async def check_jwt(request: Request, next_: callable = Depends):
+    jwt = request.headers.get("Authorization")
+    if jwt:
+        if decodeJWT(jwt):
+            return await next_(request)
+        else:
+            return Response("Invalid token or expired token", status_code=403)
+    else:
+        return Response("Not authorized", status_code=403)

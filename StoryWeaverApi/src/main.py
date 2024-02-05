@@ -1,15 +1,16 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response, Depends
 from pymongo.mongo_client import MongoClient
 from dotenv import load_dotenv
 import os
 from decouple import config
-from src.auth.router import login_router
+from src.auth.router import login_router, auth_router
+from src.auth.utils import decodeJWT
 
 load_dotenv()
 
-mongopass = config('MONGODB_PASSWORD')
+uri = config('MONGODB_URI')
 
-uri = f"mongodb+srv://root:{mongopass}@storyweaver.l1fjbdq.mongodb.net/?retryWrites=true&w=majority"
+
 # Create a new client and connect to the server
 client = MongoClient(uri)
 # Send a ping to confirm a successful connection
@@ -18,6 +19,8 @@ client = MongoClient(uri)
 
 app = FastAPI()
 app.include_router(login_router)
+
+app.include_router(auth_router)
 
 @app.get("/")
 async def root():

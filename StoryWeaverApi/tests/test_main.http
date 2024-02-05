@@ -11,3 +11,12 @@ Accept: application/json
 ###
 GET http://127.0.0.1:8000/db
 Accept: application/json
+
+POST http://127.0.0.1:8000/singup
+Content-Type: application/json
+
+{
+  "Username": "user",
+  "Email": "joe@xyz.pl",
+  "Password": "password"
+}

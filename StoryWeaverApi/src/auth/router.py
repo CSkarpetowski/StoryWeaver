@@ -3,13 +3,14 @@ from src.auth.models import UserLogin, User
 from fastapi import Body
 from src.auth.utils import check_user, signJWT, hash_password, deleteJWT, check_jwt
 from src.database import add_user, get_user
-from src.auth.service import JWTBearer
+from src.auth.dependencies import JWTBearer
 
 users = []
 
 login_router = APIRouter(prefix="/auth")
 auth_router = APIRouter(prefix="/authorized")
 login_router.include_router(auth_router)
+
 
 def is_jwtup(user: UserLogin):
     return check_user(user, users)
@@ -35,7 +36,6 @@ async def forgot_password():
 
 @auth_router.post("/logout", dependencies=[Depends(JWTBearer)])
 async def logout():
-
     return {"message": "Hello World"}
 
 

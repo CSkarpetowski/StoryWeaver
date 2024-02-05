@@ -14,11 +14,11 @@ users = db['Users']
 def get_user(UserLogin):
     user_dict = UserLogin.dict()
     try:
-        user_dict["password"] = verify_password(user_dict["password"], users.find_one({"email": user_dict["email"]})["password"])
+        user_dict["password"] = verify_password(user_dict["password"],
+                                                users.find_one({"email": user_dict["email"]})["password"])
         return user_dict
     except:
         return "User not found"
-
 
 
 def add_user(User):

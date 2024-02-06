@@ -1,14 +1,16 @@
 import time
 from typing import Dict
-import jwt
+from jose import jwt
 from decouple import config
 from fastapi import Depends, Response, Request
 from .models import User, UserLogin
 import bcrypt
+from passlib.context import CryptContext
 
 JWT_SECRET = config('JWT_SECRET')
 ALGORITHM = config('JWT_ALGORITHM')
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def token_response(token: str):
     return {
@@ -48,11 +50,11 @@ def check_user(data: UserLogin, users: list[User]):
 
 
 def hash_password(password: str):
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str):
-    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 async def check_jwt(request: Request, next_: callable = Depends):

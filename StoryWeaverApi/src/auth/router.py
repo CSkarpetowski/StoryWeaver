@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, Request
-from src.auth.models import UserLogin, User
+from fastapi import APIRouter, Depends
 from fastapi import Body
-from src.auth.utils import check_user, signJWT, hash_password, deleteJWT, check_jwt
-from src.database import add_user, get_user
+
+import src.database as db
 from src.auth.dependencies import JWTBearer
+from src.auth.models import UserLogin, User
+from src.auth.utils import check_user, signJWT, hash_password
 
 users = []
 
@@ -18,15 +19,21 @@ def is_jwtup(user: UserLogin):
 
 @login_router.post("/login")
 async def login(user: UserLogin = Body(...)):
-    response = get_user(user)
-    return signJWT(user.email)
+    response = db.get_user(user)
+    if response:
+        return signJWT(user.email)
+    else:
+        return {"error": "Invalid credentials"}
 
 
 @login_router.post("/signup")
 def create_user(user: User = Body(...)):
     user.password = hash_password(user.password)
-    add_user(user)  # replace with db call, making sure to hash the password first
-    return "Singed up successfully"
+    response = db.add_user(user)  # replace with db call, making sure to hash the password first
+    if response:
+        return {"message": "User created"}
+    else:
+        return {"error": "User already exists"}
 
 
 @login_router.post("/forgot-password")
@@ -34,9 +41,14 @@ async def forgot_password():
     return {"message": "Hello World"}
 
 
-@auth_router.post("/logout", dependencies=[Depends(JWTBearer)])
-async def logout():
-    return {"message": "Hello World"}
+@auth_router.post("/logout{email}", dependencies=[Depends(JWTBearer)])
+async def logout(email: str):
+    try:
+        db.delete_user(email)
+        return {"message": "User deleted"}
+    except Exception as e:
+        print(e)
+        return {"message": "User not found"}
 
 
 @auth_router.post("/reset-password", dependencies=[Depends(JWTBearer)])
@@ -47,3 +59,4 @@ async def reset_password():
 @auth_router.post("/change-password", dependencies=[Depends(JWTBearer)])
 async def change_password():
     return {"message": "Hello World"}
+

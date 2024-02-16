@@ -38,3 +38,25 @@ class UserLogin(BaseModel):
                 "password": "any"
             }
         }
+
+
+class ResetPassword(BaseModel):
+    password: str = Field(default=None)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "password": "any"
+            }
+        }
+
+
+class EmailForReset(BaseModel):
+    email: EmailStr = Field(default=None)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "joe@test.com"
+                }
+            }

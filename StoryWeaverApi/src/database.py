@@ -34,6 +34,10 @@ def get_user(user_login):
         return False
 
 
+def get_user_by_email(email):
+    return users.find_one({"email": email})
+
+
 def add_user(user):
     user_dict = user.dict()
     existing_user = users.find_one({"email": user_dict["email"]})

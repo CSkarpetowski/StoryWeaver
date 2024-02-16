@@ -1,15 +1,12 @@
-import time
 from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi import Body, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 
 import src.database as db
 from src.auth.Email.models import EmailSchema
 from src.auth.JWT.utils import sign_jwt, generate_password_authenticate_token, decode_jwt
 from src.auth.dependencies import oauth2
-from src.auth.models import UserLogin, User
+from src.auth.models import UserLogin, User, ResetPassword, EmailForReset
 from src.auth.utils import hash_password
 from src.auth.Email.utils import send_email
 
@@ -42,7 +39,7 @@ def create_user(backgroundtask: BackgroundTasks, user: User = Body(...)):
         "username": user.username,
         "token": activation_token
     }
-    backgroundtask.add_task(send_email,recipient, "confirmation_mail_template.html", context)
+    backgroundtask.add_task(send_email, recipient, "confirmation_mail_template.html", context)
     if response:
         return "Singed up successfully"
     else:
@@ -59,14 +56,36 @@ def activate_account(token: str):
         raise HTTPException(status_code=400, detail="Invalid token or expired token")
 
 
-@auth_router.post("/reset-password", dependencies=[Depends(oauth2)])
-async def reset_password():
-    return {"message": "Hello World"}
+@auth_router.post("/reset-password", status_code=200)
+async def reset_password(backgroundtask: BackgroundTasks, email: EmailForReset = Body(...)):
+    user = db.get_user_by_email(email.email)
+    if user:
+        reset_token = generate_password_authenticate_token(email.email)
+        db.update_user(email.email, {"reset_token": reset_token})
+        recipient = EmailSchema(email=email.email, subject="Reset your password")
+        context = {
+            "username": user["username"],
+            "token": reset_token
+        }
+        backgroundtask.add_task(send_email, recipient, "reset_password_mail_template.html", context)
+        return {"message": "Reset password email sent"}
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
 
 
-@auth_router.post("/change-password", dependencies=[Depends(oauth2)])
-async def change_password():
-    return {"message": "Hello World"}
+@auth_router.post("/change-password/{token}", status_code=200)
+async def change_password(token: str, reset: ResetPassword = Body(...)):
+    token_decoded = decode_jwt(token)
+    if token_decoded:
+        user = db.get_user_by_email(token_decoded["sub"])
+        if user and user["reset_token"] == token:  # access reset_token as a key in the user dictionary
+            new_password = hash_password(reset.password)
+            db.update_user(token_decoded["sub"], {"password": new_password, "reset_token": None})
+            return {"message": "Password changed successfully"}
+        else:
+            raise HTTPException(status_code=400, detail="Invalid token or expired token")
+    else:
+        raise HTTPException(status_code=400, detail="Invalid token or expired token")
 
 
 @auth_router.delete("/delete-account/{email}", dependencies=[Depends(oauth2)], status_code=204)

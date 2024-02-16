@@ -1,7 +1,8 @@
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi import Body
+from fastapi import Body, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 
 import src.database as db
@@ -29,28 +30,30 @@ async def login(user: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
 
 @login_router.post("/signup", status_code=201)
-def create_user(user: User = Body(...)):
+def create_user(backgroundtask: BackgroundTasks, user: User = Body(...)):
     user.password = hash_password(user.password)
     response = db.add_user(user)  # replace with db call, making sure to hash the password first
     activation_token = generate_password_authenticate_token(user.email)
+    print(activation_token)
     user.activation_token = activation_token
-    recipient = EmailSchema(email=user.email, username=user.username)
+    db.update_user(user.email, {"activation_token": activation_token})
+    recipient = EmailSchema(email=user.email, subject="Activate your account")
     context = {
-        "username": recipient.username,
-        "activation_token": activation_token
+        "username": user.username,
+        "token": activation_token
     }
-    send_email(recipient, "confirmation_mail_template.html", context)
+    backgroundtask.add_task(send_email,recipient, "confirmation_mail_template.html", context)
     if response:
         return "Singed up successfully"
     else:
         raise HTTPException(status_code=400, detail="User already exists")
 
 
-@auth_router.post("/activate/{token}", status_code=200)
+@auth_router.get("/activate/{token}", status_code=200)
 def activate_account(token: str):
     token_decoded = decode_jwt(token)
     if token_decoded:
-        db.update_user(token_decoded["sub"], {"is_active": True})
+        db.update_user(token_decoded["sub"], {"active": True})
         return {"message": "Account activated"}
     else:
         raise HTTPException(status_code=400, detail="Invalid token or expired token")

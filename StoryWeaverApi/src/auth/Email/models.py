@@ -10,8 +10,6 @@ class EmailSchema(BaseModel):
         json_schema_extra = {
             "example": {
                 "email": "test@test.com",
-                "subject": "Test Subject",
-                "link": "any",
-                "username": "TestUser"
+                "subject": "Test Subject"
                 }
             }

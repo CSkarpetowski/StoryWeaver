@@ -7,7 +7,7 @@ class User(BaseModel):
     email: EmailStr = Field(default=None)
     password: str = Field(default=None)
     active: bool = Field(default=False)
-    activation_token = Field(default=None)
+    activation_token: str = Field(default=None)
 
 
     @field_validator("username")
@@ -22,9 +22,7 @@ class User(BaseModel):
             "example": {
                 "username": "Joe Doe",
                 "email": "joe@xyz.com",
-                "password": "any",
-                "active": "False",
-                "activation_token": "any"
+                "password": "any"
             }
         }
 

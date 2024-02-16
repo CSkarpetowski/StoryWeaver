@@ -2,20 +2,27 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from src.auth.Email.models import EmailSchema
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from fastapi.templating import Jinja2Templates
+from decouple import config
 
-templates = Jinja2Templates(directory="src/auth/Email/templates")
+env = Environment(loader=FileSystemLoader('src/auth/Email/templates'),
+                  autoescape=select_autoescape(['html', 'xml']))
+
+user = config('GOOGLE_USERNAME')
+password = config('GOOGLE_PASSWORD')
+port = config('GOOGLE_PORT')
+server = config('GOOGLE_HOST')
+mail = config('GOOGLE_MAIL_FROM')
 
 conf = ConnectionConfig(
-    MAIL_USERNAME="username",
-    MAIL_PASSWORD="**********",
-    MAIL_FROM="test@email.com",
-    MAIL_PORT=587,
-    MAIL_SERVER="mail server",
-    MAIL_FROM_NAME="Desired Name",
-    MAIL_STARTTLS=True,
+    MAIL_USERNAME=mail,
+    MAIL_PASSWORD=password,
+    MAIL_FROM=mail,
+    MAIL_PORT=port,
+    MAIL_SERVER=server,
+    MAIL_FROM_NAME="noreply.StoryWeaver",
     MAIL_SSL_TLS=False,
-    USE_CREDENTIALS=True,
-    VALIDATE_CERTS=True
+    MAIL_STARTTLS=True,
+    USE_CREDENTIALS=True
 )
 
 
@@ -23,7 +30,7 @@ async def send_email(email: EmailSchema, template_name: str, context: dict):
     body = get_template(template_name, context)
     message = MessageSchema(
         subject=email.subject,
-        recipients=email.email,
+        recipients=[email.email],
         body=body,
         subtype="html"
     )
@@ -32,9 +39,6 @@ async def send_email(email: EmailSchema, template_name: str, context: dict):
 
 
 def get_template(template_name: str, context: dict):
-    env = Environment(loader=FileSystemLoader('templates'),
-                      autoescape=select_autoescape(['html', 'xml'])
-                      )
     template = env.get_template(template_name)
     body = template.render(**context)
     return body

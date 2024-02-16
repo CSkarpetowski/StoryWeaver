@@ -1,7 +1,10 @@
 from fastapi import Request, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import OAuth2PasswordBearer
+from src.auth.JWT.utils import decode_jwt
 
-from .utils import decodeJWT
+
+oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 class JWTBearer(HTTPBearer):
@@ -19,13 +22,14 @@ class JWTBearer(HTTPBearer):
         else:
             raise HTTPException(status_code=403, detail="Invalid authorization code.")
 
-    def verify_jwt(self, jwtoken: str) -> bool:
-        isTokenValid: bool = False
+    @staticmethod
+    def verify_jwt(token: str) -> bool:
+        is_token_valid: bool = False
 
         try:
-            payload = decodeJWT(jwtoken)
-        except:
-            payload = None
+            payload = decode_jwt(token)
+        except Exception as e:
+            raise Exception(f"Token verification failed: {e}")
         if payload:
-            isTokenValid = True
-        return isTokenValid
+            is_token_valid = True
+        return is_token_valid

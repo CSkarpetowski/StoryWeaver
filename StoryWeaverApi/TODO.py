@@ -8,8 +8,8 @@
 # TODO:♥      Subtask 2: Implement registration endpoint to create new users.
 # TODO:♥      Subtask 3: Implement login endpoint to generate access tokens.
 # TODO:  3.Task 3: Implement token-based authentication.
-# TODO:      Subtask 1: Generate JWT tokens upon successful login.
-# TODO:      Subtask 2: Implement token validation middleware.
+# TODO:♥      Subtask 1: Generate JWT tokens upon successful login.
+# TODO:♥     Subtask 2: Implement token validation middleware.
 # TODO:      Subtask 3: Secure relevant endpoints using token authentication.
 # TODO:  4.Task 4: Define user roles and access permissions.
 # TODO:      Subtask 1: Create user role model with necessary fields.

@@ -1,10 +1,36 @@
 <script setup>
-import Profile from './components/Profile.vue'
+
+
+</script>
+<script>
+import Profile from "@/components/Profile.vue";
+import Login from "@/components/Login.vue";
+
+
+export default {
+  components: {
+    Profile,
+    Login
+  },
+  data: () => ({
+    localStorage: localStorage
+  }),
+  computed: {
+    token() {
+      return this.localStorage.getItem('token');
+    }
+  }
+}
 </script>
 
 <template>
   <div>
-    <Profile />
+    <div v-if="localStorage.getItem('token')">
+      <Profile />
+    </div >
+    <div v-else>
+      <Login />
+    </div>
   </div>
 
 

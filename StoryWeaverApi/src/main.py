@@ -2,9 +2,10 @@ from decouple import config
 from dotenv import load_dotenv
 from fastapi import FastAPI, Depends
 from pymongo.mongo_client import MongoClient
-
+from fastapi.middleware.cors import CORSMiddleware
 from src.auth.dependencies import JWTBearer
 from src.auth.router import login_router, auth_router
+from src.chatbot.router import chatbot_router
 
 load_dotenv()
 
@@ -17,8 +18,16 @@ client = MongoClient(uri)
 
 app = FastAPI()
 app.include_router(login_router)
-
 app.include_router(auth_router)
+app.include_router(chatbot_router)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"])
 
 
 @app.get("/")
@@ -41,3 +50,7 @@ async def db():
     except Exception as e:
         print(e)
         return {"message": "Failed to connect to MongoDB!"}
+
+
+
+

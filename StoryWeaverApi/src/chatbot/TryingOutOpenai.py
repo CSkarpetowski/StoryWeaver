@@ -1,4 +1,3 @@
-import openai
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -16,4 +15,3 @@ completion = client.chat.completions.create(
         {"role": "user", "content": "What is human life expectancy in the United States?"},
     ]
 )
-

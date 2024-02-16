@@ -1,32 +1,25 @@
 <script>
 export default {
-  name: "Profile"
+  name: "Profile",
+
+  methods:{
+    deleteToken() {
+      localStorage.removeItem('token');
+      window.location.reload();
+    }
+  },
+
+  Props:{
+
+  }
 }
-
-let  name = "John Doe"
-let  level = 1
-let  exp = 0
-let  hp = 100
-
 
 
 </script>
 
 <template>
-
-<div class="profile">
-  <h1>Profile</h1>
-  <p>Here is your profile</p>
-  <div class="avatar">
-
-  </div>
-  <div  class="fields">
-    <p class="name" ></p>
-    <p class="level"></p>
-    <p class="exp"></p>
-    <p class="hp"></p>
-  </div>
-</div>
+<h1>This is after auth</h1>
+<button @click="deleteToken">DeleteToken</button>
 
 </template>
 

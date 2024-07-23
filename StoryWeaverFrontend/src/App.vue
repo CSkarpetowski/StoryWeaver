@@ -5,12 +5,14 @@
 <script>
 import Profile from "@/components/Profile.vue";
 import Login from "@/components/Login.vue";
+import Home from "@/components/Home.vue";
 
 
 export default {
   components: {
     Profile,
-    Login
+    Login,
+    Home
   },
   data: () => ({
     localStorage: localStorage
@@ -26,7 +28,7 @@ export default {
 <template>
   <div>
     <div v-if="localStorage.getItem('token')">
-      <Profile />
+      <Home />
     </div >
     <div v-else>
       <Login />

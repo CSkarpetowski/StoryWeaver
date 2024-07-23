@@ -14,15 +14,18 @@ export default {
   },
   methods:{
     getLoginData() {
-      this.email = document.getElementById('email').value;
+      this.username = document.getElementById('username').value;
       this.password = document.getElementById('password').value;
       this.login();
     },
     login() {
       axios.post('http://localhost:8000/auth/login', {
-        email: this.email,
+        username: this.username,
         password: this.password
-      })
+
+      },{headers:{
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }})
       .then((response) => {
         const token = response.data.access_token;
         localStorage.setItem('token', token);
@@ -30,21 +33,24 @@ export default {
         this.$router.push('/profile');
         window.location.reload();
       }, (error) => {
+        console.log(error.response.data)
         console.log(error);
+        console.log(this.password);
       });
     }
   },
   data: () => ({
-    email: '',
+    username: '',
     password: ''
+    
   })
 }
 </script>
 
 <template>
 
-  <label for="email">
-    <input type="text" id="email">
+  <label for="username">
+    <input type="text" id="username">
   </label>
   <label for="password">
     <input type="password" id="password">

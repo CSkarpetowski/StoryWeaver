@@ -7,12 +7,14 @@ import VueJwtDecode from "vue-jwt-decode";
 import * as VueRouter from 'vue-router';
 import Login from './components/Login.vue';
 import Profile from './components/Profile.vue';
+import Home from './components/Home.vue';
 
 const router = VueRouter.createRouter({
   history: VueRouter.createWebHashHistory(),
   routes: [
     { path: '/', component: Login },
-    { path: '/profile', component: Profile, meta: { requiresAuth: true }}
+    { path: '/profile', component: Profile, meta: { requiresAuth: true }},
+    { path: '/Home', component: Home}
   ]
 })
 

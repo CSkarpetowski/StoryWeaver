@@ -13,3 +13,9 @@ class EmailSchema(BaseModel):
                 "subject": "Test Subject"
                 }
             }
+
+
+@field_validator('email')
+def validate_email(cls, v):
+    if not v:
+        return v
